@@ -3,7 +3,9 @@
 -----
 
 Track: A
+
 Cybersecurity Pentest
+
 FLAG_SEED = g_giffin
 
 ## AI Usage
