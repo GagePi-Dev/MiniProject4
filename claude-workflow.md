@@ -25,20 +25,70 @@ decides the next action from the previous result; the human reviews each gate.
 
 ```text
 recon:   agent maps the live app from the hints — pages, forms, parameters, cookies
+MAX_ATTEMPTS = 5   # per-finding inner-loop cap before escalating to the human
 for each hint:
     goal        -> state what to achieve (e.g. "read mail that isn't mine")
     hypothesis  -> what the hint implies might be wrong
-    tool call   -> agent probes the live app (curl / browser) and reads the response
-    review      -> did that move the needle (error leaked, behavior changed, FLAG{...})?
-                     no  -> agent mutates the probe and loops (inner loop)
-                     yes -> append flag to submission.txt, save PoC
+    attempts = 0
+    repeat:
+        attempts += 1
+        tool call   -> agent probes the live app (curl / browser) and reads the response
+        review      -> did that move the needle (error leaked, behavior changed, FLAG{...})?
+                         yes -> append flag to submission.txt, save PoC; break
+                         no  -> if attempts >= MAX_ATTEMPTS:
+                                    STOP this finding, report what was tried, and
+                                    hand back to the human for input/direction
+                                else: mutate the probe and loop (inner loop)
     verify      -> run check_flags.py  ->  VALID closes the loop; NOT VALID reopens it
-document:  record the decisive request + evidence in Proof-of-Concept/<finding>/
+document:  write Proof-of-Concept/<finding>/finding.md + a screenshot of the evidence
 ```
+
+**Bounded loop:** the inner loop is capped at `MAX_ATTEMPTS` (default 5). If a finding
+isn't captured within the cap, the agent does **not** keep grinding — it stops, writes
+up what it tried and what each attempt returned, and escalates to me for a new idea or
+decision. This prevents runaway loops and keeps a human review gate on every finding.
 
 **Verification oracle:** `check_flags.py` is the automated feedback signal. A finding
 is only "done" when `python check_flags.py submission.txt --username g_giffin` reports
 VALID for its line — this turns the *review* step from eyeballing into pass/fail.
+
+## Documenting findings (loop output)
+
+The *document* step is not an afterthought — it is where each loop deposits its result.
+When a finding's loop closes (flag captured, `check_flags.py` VALID), the agent writes a
+note into that finding's folder so the evidence survives outside this chat:
+
+```text
+Proof-of-Concept/<finding>/
+├── finding.md      # the write-up the agent produces
+└── evidence.png    # screenshot of the request/response that captured the flag
+```
+
+Each `finding.md` uses the same template, which is exactly what the pentest report is
+later assembled from (one report section per finding):
+
+```markdown
+# <Finding name> — <vuln class>
+
+- Endpoint: <path/method>
+- Severity: <Low|Medium|High|Critical>
+- Flag: FLAG{...}
+
+## Request / payload / command
+<the exact decisive request, payload, or curl/command that worked>
+
+## What happened
+<short explanation: why it worked, what the response showed, the discovery steps/iterations>
+
+## Evidence
+![evidence](evidence.png)
+
+## Remediation
+<one or two lines on the fix>
+```
+
+This keeps the raw exploit detail in the PoC folders (not in this process doc), and
+gives the report-generation step a clean, consistent source for every finding.
 
 ## Per-finding loop traces
 
