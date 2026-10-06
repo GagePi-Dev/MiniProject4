@@ -34,12 +34,14 @@ for each hint:
         attempts += 1
         tool call   -> agent probes the live app (curl / browser) and reads the response
         review      -> did that move the needle (error leaked, behavior changed, FLAG{...})?
-                         yes -> append flag to submission.txt, save PoC; break
+                         yes -> capture: echo 'FLAG{...}' >> submission.txt   (exact token, one per line)
+                                save PoC; break
                          no  -> if attempts >= MAX_ATTEMPTS:
                                     STOP this finding, report what was tried, and
                                     hand back to the human for input/direction
                                 else: mutate the probe and loop (inner loop)
-    verify      -> run check_flags.py  ->  VALID closes the loop; NOT VALID reopens it
+    verify      -> python check_flags.py submission.txt --username g_giffin
+                   -> VALID closes the loop; NOT VALID reopens it (flag mistyped / wrong seed)
 document:  write Proof-of-Concept/<finding>/finding.md + a screenshot of the evidence
 ```
 
