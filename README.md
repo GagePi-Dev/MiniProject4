@@ -1,10 +1,11 @@
-# Mini Project 4
+# Mini Project 4 — Vuln Hub Pentest
+
+INF601 — Advanced Programming in Python · Cybersecurity concentration.
+An authorized, agent-driven penetration test of the instructor-provided Vuln Hub target.
 
 Track: A
 
-Cybersecurity Pentest
-
-FLAG_SEED = g_giffin
+**Seed:** `FLAG_SEED=g_giffin` — my FHSU username, which derives this repo's flags.
 
 ## About this repo
 
@@ -29,6 +30,28 @@ claude-workflow.md  ──drives──▶  the loop  ──▶  submission.txt  
                                            └──▶  Proof-of-Concept/  (per-finding detail)
                                                         └──▶  pentest report
 ```
+
+## The agentic loop
+
+The pentest is run as an agentic loop — the rubric's **goal → tool calls → review**
+cycle — defined in full in `claude-workflow.md`. In short:
+
+1. **Recon** — the agent maps the live app from the six public hints (pages, forms,
+   parameters, cookies). It does **not** read the target's source; this is black box.
+2. **Per finding** it then loops:
+   - **Goal** — what to achieve (e.g. "read a message that isn't mine").
+   - **Tool call** — it probes the live app (curl / browser) and reads the response.
+   - **Review** — did that move the needle? If a `FLAG{...}` dropped, capture it; if
+     not, mutate the probe and try again.
+3. **Capture & verify** — the flag is appended to `submission.txt` and confirmed with
+   `check_flags.py`; the request/payload/evidence is written to `Proof-of-Concept/`.
+
+Two guardrails keep a human in control:
+
+- **Bounded attempts** — each finding's inner loop is capped (default 5 tries). If it
+  can't capture the flag within the cap, the agent stops, reports what it tried, and
+  hands back to me rather than grinding indefinitely.
+- **Review gates** — I review each result and redirect the agent when it goes wrong.
 
 ## How to run / reproduce
 
@@ -74,11 +97,11 @@ It prints `VALID` / `NOT VALID` per line (it awards no points — credit require
 
 ## Scope & authorization
 
-This penetration test was performed **only** against the instructor-provided Vuln Hub
-target, running locally on my own machine and bound to `127.0.0.1`, as an authorized
-exercise for INF601 Mini Project 4. No other systems were scanned, accessed, or tested.
-All testing was self-contained on localhost. The full scope and authorization statement
-is restated at the top of the pentest report.
+This penetration test was performed **only** against the instructor-provided
+target. It ran locally on my own machine and bound to `127.0.0.1` as an authorized
+exercise for INF601 Mini Project 4. No other systems were scanned, accessed, or pen-tested.
+All testing was self-contained on localhost. This pen-test was entirely done for educational
+purposes on intended systems. This process is not designed or intended for anything otherwise.
 
 — Gage Giffin, INF601 (Fall 2026)
 
@@ -96,3 +119,5 @@ Below is a overview of the use of artificial intelligence through this project.
 Base README and organization. 
 
 ### What I changed in AI-generated code
+
+Edited the default created scope and authorization statement. 
