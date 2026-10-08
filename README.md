@@ -113,6 +113,8 @@ Below is a overview of the use of artificial intelligence through this project.
 
 - Claude Code (Opus 4.8) - Created empty `submission.txt` and the Proof-of-Concept folder structure for each vulnerability.
 - Claude Code (Opus 4.8) - Drafted the repo overview, run/reproduce, and scope/authorization sections of the README.
+- Claude Code (Opus 4.8) - Ran the black-box pentest loop, captured the 6 flags, and wrote the per-finding Proof-of-Concept notes.
+- Claude Code (Opus 4.8) - Drafted the pentest report (`pentest-report.md`) from the captured findings.
 
 ### What I wrote myself
 
